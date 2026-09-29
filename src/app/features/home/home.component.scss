@@ -1,0 +1,96 @@
+.categories-section { padding-top: 64px; background: #fff; }
+.category-title { color: var(--cocoa); font: 700 clamp(2.5rem, 4.6vw, 4.15rem)/1.06 'Aboreto', sans-serif; transform: scaleX(1.04); transform-origin: left center; }
+.category-title-line { display: inline-block; }
+.featured-title { font-family: 'Aboreto', sans-serif; }
+.featured-title-line { display: inline-block; }
+.home-aboreto-title { font-family: 'Aboreto', sans-serif; }
+.story-title-line { display: inline-block; max-width: 100%; }
+.values-title-line { display: inline-block; }
+.review-title-line { display: inline-block; }
+.section-topline { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.section-topline .text-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; border: 1px solid #a7866f; border-radius: 3px; background: #fffefa; color: var(--cocoa); font-size: .79rem; font-weight: 600; transition: background .2s, border-color .2s, color .2s; }
+.section-topline .text-link:hover, .section-topline .text-link:focus-visible { border-color: var(--cocoa); background: var(--cocoa); color: #fff; }
+.section-topline .text-link .material-symbols-outlined { font-size: 17px; transition: transform .2s; }
+.section-topline .text-link:hover .material-symbols-outlined, .section-topline .text-link:focus-visible .material-symbols-outlined { transform: translateX(3px); }
+.catalog-status { width: min(1240px, calc(100% - 48px)); margin: 18px auto 0; padding: 12px 16px; border-left: 3px solid var(--honey); background: #fff; color: var(--muted); font-size: .85rem; }
+.category-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 12px; }
+.products-section { background: var(--paper); }
+.products-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
+.products-heading .section-heading { margin-bottom: 28px; }
+.products-heading .section-intro { margin: -17px 0 0; }
+.products-heading > .button { flex: 0 0 auto; margin-bottom: 30px; }
+.product-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.story-section { padding-block: 95px; background: #f0ebe3; }
+.story-grid { display: grid; grid-template-columns: 1fr .9fr; align-items: center; gap: clamp(40px, 7vw, 96px); }
+.story-photo { position: relative; overflow: hidden; aspect-ratio: .98; background: #d1bca4; }
+.story-photo img { width: 100%; height: 100%; object-fit: cover; }
+.photo-label { position: absolute; right: 0; bottom: 0; padding: 12px 16px; background: #fff; color: var(--cocoa); font-size: .69rem; }
+.story-copy > p { margin: -13px 0 20px; color: #6e655b; font: 400 .91rem/1.85 'Nunito', sans-serif; }
+.story-copy > .text-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; border: 1px solid #a7866f; border-radius: 3px; background: #fffefa; color: var(--cocoa); font-size: .79rem; font-weight: 600; transition: background .2s, border-color .2s, color .2s; }
+.story-copy > .text-link:hover, .story-copy > .text-link:focus-visible { border-color: var(--cocoa); background: var(--cocoa); color: #fff; }
+.story-copy > .text-link .material-symbols-outlined { font-size: 17px; transition: transform .2s; }
+.story-copy > .text-link:hover .material-symbols-outlined, .story-copy > .text-link:focus-visible .material-symbols-outlined { color: #fff; }
+.story-copy > .text-link:hover .material-symbols-outlined, .story-copy > .text-link:focus-visible .material-symbols-outlined { transform: translateX(3px); }
+.story-copy .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 28px; padding-top: 20px; border-top: 1px solid #bcae9e; }
+.story-copy .stats-grid > div { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.story-copy .stats-grid strong { color: var(--cocoa); font: 600 1.55rem/1 'Nunito', sans-serif; }
+.story-copy .stats-grid strong span { color: #b98950; }
+.story-copy .stats-grid small { color: #777066; font-family: 'Nunito', sans-serif; font-size: .65rem; line-height: 1.35; }
+.values-section { background: #fff; }
+.values-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.values-grid article { min-width: 0; min-height: 190px; padding: 25px 20px; border: 1px solid #ece5dd; border-radius: 4px; background: #fff; box-shadow: 0 4px 14px rgba(53, 37, 23, .08); transition: box-shadow .2s ease; }
+.values-grid article:hover { box-shadow: 0 7px 18px rgba(53, 37, 23, .12); }
+.values-grid .material-symbols-outlined { color: #ae8050; font-size: 28px; }
+.values-grid h3 { margin: 16px 0 8px; color: var(--cocoa); font: 600 1.1rem 'Nunito', sans-serif; }
+.values-grid p { margin: 0; color: #81786f; font: 400 .79rem/1.7 'Nunito', sans-serif; }
+.review-section { padding-block: 82px; background: #f0ebe3; }
+.review-inner { display: grid; grid-template-columns: 1fr; gap: 26px; }
+.review-heading .section-heading { margin-bottom: 22px; font-size: clamp(1.8rem, 3.3vw, 2.5rem); }
+.review-card { padding: 36px 40px; border: 1px solid #ddd3c6; background: #faf8f4; }
+.review-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.review-controls { display: flex; flex: 0 0 auto; gap: 9px; }
+.review-stars { color: #ae8050; letter-spacing: .18em; text-align: left; }
+.review-quote { position: static; }
+.review-quote blockquote { padding-inline: 0; }
+.review-arrow { display: none; box-sizing: border-box; aspect-ratio: 1; align-items: center; justify-items: center; line-height: 1; }
+.review-arrow:hover { border-color: var(--cocoa); background: var(--cocoa); color: #faf8f4; }
+.review-arrow .material-symbols-outlined { font-size: 22px; }
+.review-card blockquote { min-height: 100px; margin: 20px 0 28px; color: var(--cocoa); font: 500 clamp(1.15rem, 2vw, 1.55rem)/1.55 'Nunito', sans-serif; }
+.review-person { display: flex; align-items: center; gap: 12px; }
+.review-person img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+.review-person strong, .review-person small { display: block; }
+.review-person strong { color: var(--cocoa); font-size: .82rem; }
+.review-person small { margin-top: 4px; color: #8b8177; font-size: .7rem; }
+@media (max-width: 1000px) { .category-grid { grid-template-columns: repeat(4, 1fr); } .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .values-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 850px) { .category-title { font-size: clamp(2.25rem, 5.5vw, 3.5rem); } }
+@media (max-width: 650px) { .category-title { font-size: clamp(2.45rem, 11vw, 3.3rem); } }
+@media (max-width: 700px) {
+	.section-topline { align-items: flex-start; flex-wrap: wrap; }
+	.section-topline .text-link { max-width: none; text-align: left; white-space: nowrap; }
+	.category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+	.category-title { font-size: 2.2rem; transform: none; }
+	.products-heading { display: block; }
+	.products-heading > .button { width: 100%; margin: 20px 0 24px; }
+	.product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+	.story-section { padding-block: 62px; }
+	.story-grid { grid-template-columns: 1fr; gap: 32px; }
+	.story-photo { aspect-ratio: 1.25; }
+	.story-copy .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 14px; }
+	.values-grid { gap: 12px; }
+	.review-inner { grid-template-columns: 1fr; gap: 26px; }
+	.review-card { padding: 25px 22px; }
+	.review-quote { position: relative; display: grid; grid-template-columns: 34px minmax(0, 1fr) 34px; align-items: center; gap: 20px; }
+	.review-quote blockquote { padding-inline: 0; }
+	.review-arrow { position: static; display: grid; width: 34px; height: 34px; border-radius: 50%; align-items: center; justify-items: center; }
+	.review-arrow .material-symbols-outlined { display: block; line-height: 1; }
+	.review-card blockquote { min-height: 0; }
+	.review-card-footer { flex-wrap: wrap; }
+}
+@media (max-width: 480px) {
+	.values-grid { grid-template-columns: 1fr; }
+	.values-grid article, .values-grid article + article { min-height: 0; padding: 20px 0; border: 0; border-top: 1px solid #ece5dd; box-shadow: none; }
+	.values-grid article:first-child { border-top: 0; }
+	.values-grid article:nth-child(3) { padding-left: 0; border-left: 0; }
+	.review-card { padding-inline: 18px; }
+}
+@media (max-width: 390px) { .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

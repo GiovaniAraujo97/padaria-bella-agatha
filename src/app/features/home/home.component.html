@@ -1,0 +1,50 @@
+<app-hero-banner />
+@if (catalogError) { <p class="catalog-status" role="status">{{ catalogError }}</p> }
+
+<section class="section categories-section" appReveal>
+  <div class="container">
+    <div class="section-topline"><span class="eyebrow">Um mundo de sabores</span><a class="text-link" routerLink="/produtos">Ver todos os produtos <span class="material-symbols-outlined">arrow_forward</span></a></div>
+    <h2 class="section-heading category-title"><span class="category-title-line" [style.opacity]="firstLineOpacity()" [style.transform]="'translateX(' + firstLineOffset() + 'px)'">Do nosso forno</span><br><span class="category-title-line" [style.opacity]="secondLineOpacity()" [style.transform]="'translateX(' + secondLineOffset() + 'px)'">para a sua mesa.</span></h2>
+    <div class="category-grid">
+      @for (category of categories; track category.slug) { <app-category-card appReveal [category]="category" /> }
+    </div>
+  </div>
+</section>
+
+<section class="section products-section" appReveal>
+  <div class="container">
+    <div class="section-topline"><span class="eyebrow">Escolhas da casa</span></div>
+    <div class="products-heading"><div><h2 class="section-heading featured-title"><span class="featured-title-line" [style.opacity]="featuredLineOpacity()" [style.transform]="'translateX(' + featuredLineOffset() + 'px)'">Queridinhos da Bella</span></h2><p class="section-intro">Receitas que já conquistaram a vizinhança, feitas fresquinhas todos os dias.</p></div><a routerLink="/produtos" class="button button--outline">Conheça o cardápio</a></div>
+    <div class="product-grid">
+      @for (product of products; track product.id) { <app-product-card appReveal [product]="product" (add)="addToCart($event)" /> }
+    </div>
+  </div>
+</section>
+
+<section class="story-section" appReveal>
+  <div class="container story-grid">
+    <div class="story-photo"><img src="/img-sobre.png?v=2" alt="Pães artesanais feitos na cozinha Bella Agatha" loading="lazy"><span class="photo-label">Nossa cozinha · 06:12 da manhã</span></div>
+    <div class="story-copy"><span class="eyebrow">Uma história feita à mão</span><h2 class="section-heading home-aboreto-title"><span class="story-title-line" [style.opacity]="storyTitleOpacity()" [style.transform]="'translateX(' + storyTitleOffset() + 'px)'">Nossa história começa com o primeiro pão do dia.</span></h2><p [style.opacity]="storyParagraphOpacity()" [style.transform]="'perspective(800px) translateZ(' + storyParagraphDepth() + 'px)'">Em 2004, a Bella Agatha nasceu de uma mesa pequena, um forno aceso antes do sol e uma receita de família. Hoje, seguimos acreditando que o melhor ingrediente é o tempo: para a massa crescer, para o café passar e para a gente receber cada pessoa pelo nome.</p><a routerLink="/sobre" class="text-link">Conheça a Bella Agatha <span class="material-symbols-outlined">arrow_forward</span></a>
+      <div class="stats-grid"><div [style.opacity]="statisticOpacities()[0]" [style.transform]="'translateY(' + statisticOffsets()[0] + 'px)'"><strong>20<span>+</span></strong><small>anos de forno aceso</small></div><div [style.opacity]="statisticOpacities()[1]" [style.transform]="'translateY(' + statisticOffsets()[1] + 'px)'"><strong>5 mil</strong><small>clientes felizes</small></div><div [style.opacity]="statisticOpacities()[2]" [style.transform]="'translateY(' + statisticOffsets()[2] + 'px)'"><strong>100</strong><small>receitas de família</small></div><div [style.opacity]="statisticOpacities()[3]" [style.transform]="'translateY(' + statisticOffsets()[3] + 'px)'"><strong>50</strong><small>delícias por dia</small></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section values-section" appReveal>
+  <div class="container"><span class="eyebrow">O cuidado está nos detalhes</span><h2 class="section-heading home-aboreto-title"><span class="values-title-line" [style.opacity]="valuesLineOpacities()[0]" [style.transform]="'translateX(' + valuesLineOffsets()[0] + 'px)'">Mais do que gostoso.</span><br><span class="values-title-line" [style.opacity]="valuesLineOpacities()[1]" [style.transform]="'translateX(' + valuesLineOffsets()[1] + 'px)'">Feito do jeito certo.</span></h2>
+    <div class="values-grid">
+      <article><span class="material-symbols-outlined" [style.opacity]="valueContentOpacities()[0]" [style.transform]="'translateY(' + valueContentOffsets()[0] + 'px)'">nutrition</span><h3 [style.opacity]="valueContentOpacities()[1]" [style.transform]="'translateY(' + valueContentOffsets()[1] + 'px)'">Ingredientes selecionados</h3><p [style.opacity]="valueContentOpacities()[2]" [style.transform]="'translateY(' + valueContentOffsets()[2] + 'px)'">Escolhemos cada ingrediente como quem escolhe para a própria família.</p></article>
+      <article><span class="material-symbols-outlined" [style.opacity]="valueContentOpacities()[3]" [style.transform]="'translateY(' + valueContentOffsets()[3] + 'px)'">bakery_dining</span><h3 [style.opacity]="valueContentOpacities()[4]" [style.transform]="'translateY(' + valueContentOffsets()[4] + 'px)'">Produção artesanal</h3><p [style.opacity]="valueContentOpacities()[5]" [style.transform]="'translateY(' + valueContentOffsets()[5] + 'px)'">Receitas cuidadosas, pequenas fornadas e respeito ao tempo de cada massa.</p></article>
+      <article><span class="material-symbols-outlined" [style.opacity]="valueContentOpacities()[6]" [style.transform]="'translateY(' + valueContentOffsets()[6] + 'px)'">delivery_dining</span><h3 [style.opacity]="valueContentOpacities()[7]" [style.transform]="'translateY(' + valueContentOffsets()[7] + 'px)'">Entrega com carinho</h3><p [style.opacity]="valueContentOpacities()[8]" [style.transform]="'translateY(' + valueContentOffsets()[8] + 'px)'">Seu pedido sai fresquinho da nossa cozinha e chega quentinho até você.</p></article>
+      <article><span class="material-symbols-outlined" [style.opacity]="valueContentOpacities()[9]" [style.transform]="'translateY(' + valueContentOffsets()[9] + 'px)'">verified</span><h3 [style.opacity]="valueContentOpacities()[10]" [style.transform]="'translateY(' + valueContentOffsets()[10] + 'px)'">Qualidade de verdade</h3><p [style.opacity]="valueContentOpacities()[11]" [style.transform]="'translateY(' + valueContentOffsets()[11] + 'px)'">Mais de duas décadas de tradição em cada mordida e cada encontro.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="review-section" appReveal>
+  <div class="container review-inner"><div class="review-heading"><span class="eyebrow">Palavra de quem prova</span><h2 class="section-heading home-aboreto-title"><span class="review-title-line" [style.opacity]="reviewTitleOpacities()[0]" [style.transform]="'translateX(' + reviewTitleOffsets()[0] + 'px)'">Carinho que</span><br><span class="review-title-line" [style.opacity]="reviewTitleOpacities()[1]" [style.transform]="'translateX(' + reviewTitleOffsets()[1] + 'px)'">volta em forma de elogio.</span></h2></div>
+    <article class="review-card"><div class="review-stars" aria-label="5 de 5 estrelas" [style.opacity]="reviewContentOpacities()[0]" [style.transform]="'translateY(' + reviewContentOffsets()[0] + 'px)'">★★★★★</div><div class="review-quote"><button type="button" class="review-arrow" aria-label="Comentário anterior" [style.opacity]="reviewArrowOpacities()[0]" [style.transform]="'translateX(' + reviewArrowOffsets()[0] + 'px)'" (click)="changeReview(-1)"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span></button><blockquote [style.opacity]="reviewContentOpacities()[1]" [style.transform]="'translateY(' + reviewContentOffsets()[1] + 'px)'">“{{ reviews[reviewIndex()].text }}”</blockquote><button type="button" class="review-arrow" aria-label="Próximo comentário" [style.opacity]="reviewArrowOpacities()[1]" [style.transform]="'translateX(' + reviewArrowOffsets()[1] + 'px)'" (click)="changeReview(1)"><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button></div><div class="review-person" [style.opacity]="reviewContentOpacities()[2]" [style.transform]="'translateY(' + reviewContentOffsets()[2] + 'px)'"><img [src]="'https://images.unsplash.com/' + reviews[reviewIndex()].photo + '?auto=format&fit=crop&w=120&q=80'" [alt]="reviews[reviewIndex()].name" loading="lazy"><div><strong>{{ reviews[reviewIndex()].name }}</strong><small>Cliente Bella Agatha</small></div></div></article>
+  </div>
+</section>
+
+<section class="visit-banner" appReveal><div class="container visit-content"><div><span class="eyebrow">A gente guarda uma mesa pra você</span><h2>O próximo café pode ser aqui.</h2><p>Passa na Bella. O pão acabou de sair do forno.</p></div><a routerLink="/contato" class="button">Como chegar <span class="material-symbols-outlined">arrow_forward</span></a></div></section>
