@@ -7,6 +7,7 @@ import { supabase } from '../config/supabase.config';
 @Injectable({ providedIn: 'root' })
 export class ProductService {
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
+  private refreshQueued = false;
   private readonly productState = signal<Product[]>([]);
   private readonly categoryState = signal<Category[]>([]);
   readonly products = this.productState.asReadonly();
@@ -15,7 +16,10 @@ export class ProductService {
   readonly error = signal<string | null>(null);
 
   constructor() {
-    if (this.browser) this.refresh();
+    if (this.browser) {
+      this.refresh();
+      this.subscribeToCatalogChanges();
+    }
   }
 
   getProducts(): Product[] { return this.productState(); }
@@ -46,5 +50,22 @@ export class ProductService {
       this.error.set(null);
     }).catch(() => this.error.set('Não foi possível carregar o catálogo do banco de dados.'))
       .finally(() => this.loading.set(false));
+  }
+
+  private subscribeToCatalogChanges(): void {
+    supabase.channel('catalog-live-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => this.queueRefresh())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => this.queueRefresh())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_sizes' }, () => this.queueRefresh())
+      .subscribe();
+  }
+
+  private queueRefresh(): void {
+    if (this.refreshQueued) return;
+    this.refreshQueued = true;
+    setTimeout(() => {
+      this.refreshQueued = false;
+      this.refresh();
+    }, 150);
   }
 }

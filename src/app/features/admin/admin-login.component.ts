@@ -45,7 +45,7 @@ import { AdminService } from '../../core/services/admin.service';
     input { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: inherit; }
     .password-field input { padding-right: 48px; }
     input:focus { outline: 2px solid var(--honey); outline-offset: 1px; }
-    .password-toggle { position: absolute; top: 50%; right: 4px; display: grid; width: 38px; height: 38px; margin: 0; padding: 0; place-items: center; transform: translateY(-50%); border: 0; background: transparent; color: var(--muted); }
+    .password-toggle { position: absolute; top: 50%; right: 4px; display: grid; width: 38px; height: 38px; margin: 0; padding: 0; place-items: center; transform: translateY(-50%); border: 0; background: transparent; color: var(--muted); cursor: pointer; }
     .password-toggle:hover { color: var(--cocoa); }
     .password-toggle:focus-visible { outline: 2px solid var(--honey); outline-offset: -2px; }
     .password-toggle .material-symbols-outlined { font-size: 20px; }

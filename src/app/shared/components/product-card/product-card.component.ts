@@ -44,7 +44,8 @@ import { Product, ProductSelection, ProductSize } from '../../../core/interfaces
   `,
   styles: [`
     :host { display: block; }
-    .product-card { overflow: hidden; height: 100%; border: 1px solid #eae4dc; background: #fff; }
+    .product-card { overflow: hidden; height: 100%; border: 1px solid #eae4dc; background: #fff; transition: border-color .2s, box-shadow .2s; }
+    .product-card:hover, .product-card:has(.product-image-wrap:focus-visible) { border-color: #c9a878; box-shadow: 0 8px 20px #39281918; }
     .product-image-wrap { position: relative; display: block; overflow: hidden; width: 100%; padding: 0; border: 0; aspect-ratio: 1.55; background: #eee8df; text-align: left; }
     .product-image-wrap:not(:disabled) { cursor: pointer; }
     .product-image-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform .45s; }
@@ -56,7 +57,8 @@ import { Product, ProductSelection, ProductSize } from '../../../core/interfaces
     .size-dialog-image { min-height: 100%; background: #eee8df; }
     .size-dialog-image img { width: 100%; height: 100%; object-fit: cover; }
     .size-dialog-details { position: relative; display: flex; flex-direction: column; justify-content: center; padding: 42px 34px 30px; }
-    .dialog-close { position: absolute; top: 12px; right: 12px; display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid #e7ded3; border-radius: 50%; background: #fff; color: var(--cocoa); cursor: pointer; transition: background .2s, border-color .2s, color .2s; }
+    .dialog-close { position: absolute; top: 12px; right: 12px; display: grid; box-sizing: border-box; width: 36px; height: 36px; place-items: center; overflow: hidden; border: 1px solid #e7ded3; border-radius: 50%; background: #fff; color: var(--cocoa); cursor: pointer; line-height: 1; transition: background .2s, border-color .2s, color .2s; }
+    .dialog-close .material-symbols-outlined { display: block; font-size: 20px; line-height: 1; }
     .dialog-close:hover, .dialog-close:focus-visible { border-color: var(--cocoa); background: var(--cocoa); color: #fff; }
     .size-dialog-details > .eyebrow { font-size: .62rem; }
     .size-dialog-details h2 { margin: 12px 32px 8px 0; color: var(--cocoa); font: 600 1.65rem/1.2 'Aboreto', sans-serif; }

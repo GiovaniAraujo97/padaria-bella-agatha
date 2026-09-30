@@ -90,17 +90,16 @@ const emptyCategory = (): CategoryDraft => ({ name: '', hasSizes: false });
     .admin-header, .section-heading, .editor-title { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
     .admin-header h1 { margin: 10px 0 24px; color: var(--cocoa); font: 600 2.2rem/1.15 'Aboreto', sans-serif; }
     .text-button { padding: 9px 15px; border: 1px solid var(--line); background: #fff; color: var(--cocoa); cursor: pointer; }
-    .admin-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
     .admin-tabs button { display: inline-flex; align-items: center; gap: 9px; padding: 13px 17px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); cursor: pointer; }
     .admin-tabs button.active { border-color: var(--honey); color: var(--cocoa); font-weight: 700; }
-    .admin-tabs span { color: #96887b; font-size: .75rem; }
     .section-heading { margin: 30px 0 20px; }
     .section-heading h2 { margin: 0 0 4px; color: var(--cocoa); font: 600 1.55rem 'Aboreto', sans-serif; }
     .section-heading p { margin: 0; color: var(--muted); font-size: .85rem; }
     .section-heading .button, .form-actions .button { min-height: 42px; }
     .notice, .error-notice { margin: 18px 0; padding: 12px 15px; border-left: 3px solid #69866b; background: #fff; color: #385940; }
     .error-notice { border-color: #b65343; color: #8f3227; }
-    .editor { scroll-margin-top: 24px; margin: 20px 0 28px; padding: 22px; border: 1px solid var(--line); background: #fff; }
+    .editor { scroll-margin-top: 24px; margin: 20px 0 28px; padding: 22px; border: 1px solid #c9a878; }
+    .editor:hover { border-color: #a9814b; }
     .editor-title { margin-bottom: 18px; }
     .editor-title h3 { margin: 0; color: var(--cocoa); font: 600 1.2rem 'Aboreto', sans-serif; }
     .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
@@ -148,6 +147,7 @@ const emptyCategory = (): CategoryDraft => ({ name: '', hasSizes: false });
     .admin-header h1 { margin: 11px 0 0; font-size: 2.05rem; }
     .admin-label { color: #9a8c7c; font-size: .67rem; font-weight: 500; letter-spacing: .04em; }
     .exit-button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 13px; }
+    .exit-button:hover, .exit-button:focus-visible { border-color: #c9a878; }
     .exit-button .material-symbols-outlined { font-size: 19px; }
     .admin-tabs { width: fit-content; gap: 5px; padding: 5px; border: 1px solid #e7dfd4; background: #f1ece5; }
     .admin-tabs button { min-width: 146px; justify-content: space-between; padding: 11px 13px; border: 0; color: #71685f; font-size: .86rem; }
@@ -161,8 +161,9 @@ const emptyCategory = (): CategoryDraft => ({ name: '', hasSizes: false });
     .admin-search { position: relative; display: block; width: min(100%, 360px); margin-top: 14px; }
     .admin-search .material-symbols-outlined { position: absolute; top: 50%; left: 11px; color: var(--muted); font-size: 19px; transform: translateY(-50%); }
     .admin-search input { min-height: 38px; padding-left: 38px; background: #fff; }
+    .admin-search input:focus { border-color: #c9a878; }
     .section-heading .button { flex: 0 0 auto; padding-inline: 16px; font: 600 .9rem/1 var(--sans); white-space: nowrap; }
-    .notice, .error-notice { display: flex; align-items: center; gap: 10px; padding: 13px 15px; }
+    .notice, .error-notice { position: fixed; top: 50%; left: 50%; z-index: 20; display: flex; width: min(calc(100% - 36px), 460px); align-items: center; gap: 10px; margin: 0; padding: 16px 18px; transform: translate(-50%, -50%); border: 1px solid #c9a878; box-shadow: 0 18px 45px #3928192e; }
     .notice .material-symbols-outlined, .error-notice .material-symbols-outlined { font-size: 20px; }
     .connection-state, .empty-state { display: flex; align-items: center; gap: 20px; margin-top: 28px; padding: 30px; border: 1px solid var(--line); background: #fff; }
     .connection-state { border-left: 4px solid #b65343; background: #fffaf8; }

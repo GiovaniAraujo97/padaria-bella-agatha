@@ -100,7 +100,10 @@ export class AdminService {
   }
 
   deleteCategory(id: number): Observable<void> {
-    return from(supabase.from('categories').delete().eq('id', id)).pipe(map(({ error }) => { if (error) throw error; }));
+    return from(supabase.from('categories').delete().eq('id', id).select('id')).pipe(map(({ data, error }) => {
+      if (error) throw error;
+      if (!data?.length) throw new Error('A categoria não foi excluída. Verifique a permissão administrativa.');
+    }));
   }
 
   products(): Observable<AdminProduct[]> {
@@ -146,7 +149,10 @@ export class AdminService {
   }
 
   deleteProduct(id: number): Observable<void> {
-    return from(supabase.from('products').delete().eq('id', id)).pipe(map(({ error }) => { if (error) throw error; }));
+    return from(supabase.from('products').delete().eq('id', id).select('id')).pipe(map(({ data, error }) => {
+      if (error) throw error;
+      if (!data?.length) throw new Error('O produto não foi excluído. Verifique a permissão administrativa.');
+    }));
   }
 
   private toProduct(product: DatabaseProduct): AdminProduct {
