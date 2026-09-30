@@ -4,6 +4,7 @@ import { afterNextRender, Component, computed, ElementRef, inject, Injector, sig
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
+import { switchMap } from 'rxjs';
 import { ProductSize } from '../../core/interfaces/product.interface';
 import { AdminCategory, AdminProduct, AdminService, CategoryInput } from '../../core/services/admin.service';
 
@@ -39,7 +40,7 @@ const emptyCategory = (): CategoryDraft => ({ name: '', hasSizes: false });
               <label>Categoria<select name="categoryId" [(ngModel)]="draft.categoryId" required><option [ngValue]="0" disabled>Selecione</option>@for (category of categories(); track category.id) { <option [ngValue]="category.id">{{ category.name }}</option> }</select></label>
               <label class="span-two">Descrição<textarea name="description" [(ngModel)]="draft.description" maxlength="2000" rows="3"></textarea></label>
               <label>Preço base<input name="price" [ngModel]="basePriceInput" (ngModelChange)="updateBasePrice($event)" type="text" inputmode="decimal" placeholder="0,00" required></label>
-              <label class="span-two">URL da imagem<input name="image" [(ngModel)]="draft.image" type="text" pattern="(/(?!/).+|https://.+)" maxlength="2048" placeholder="https://... ou /images/produto.jpg" required></label>
+              <label class="span-two image-field">Imagem do produto<input name="image" type="file" accept="image/jpeg,image/png,image/webp,image/avif" (change)="selectImage($event)">@if (selectedImage) { <small>{{ selectedImage.name }}</small> } @else if (draft.image) { <small>Imagem atual mantida. Selecione um arquivo para substituir.</small> }</label>
               @if (categoryAllowsSizes()) { <fieldset class="span-two size-fields"><legend>Tamanhos disponíveis</legend><div class="size-checks">@for (size of sizeOptions; track size.key) { <label class="size-check"><input type="checkbox" [checked]="isSizeSelected(size.key)" (change)="toggleSize(size.key, $any($event.target).checked)">{{ size.label }}</label> }</div><div class="size-prices">@for (size of sizeOptions; track size.key) { @if (isSizeSelected(size.key)) { <label>Preço {{ size.label }}<input #sizePriceInput [name]="'sizePrice-' + size.key" [ngModel]="sizePriceInputs[size.key] ?? ''" (ngModelChange)="updateSizePrice(size.key, $event, sizePriceInput)" type="text" inputmode="decimal" placeholder="0,00" required></label> } }</div></fieldset> }
               <div class="toggles span-two"><label><input name="featured" [(ngModel)]="draft.featured" type="checkbox"> Destaque</label><label><input name="available" [(ngModel)]="draft.available" type="checkbox"> Disponível</label><label><input name="published" [(ngModel)]="draft.published" type="checkbox"> Publicado</label></div>
             </div>
@@ -49,7 +50,7 @@ const emptyCategory = (): CategoryDraft => ({ name: '', hasSizes: false });
         @if (loading()) { <p class="loading" role="status"><span class="material-symbols-outlined" aria-hidden="true">progress_activity</span>Carregando produtos...</p> }
         @else if (!products().length) { <div class="empty-state"><span class="material-symbols-outlined" aria-hidden="true">inventory_2</span><div class="empty-copy"><h3>Nenhum produto cadastrado</h3><p>Adicione o primeiro produto para começar a montar o cardápio.</p></div></div> }
         @else {
-          <div class="table-wrap"><table><thead><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Visibilidade</th><th>Ações</th></tr></thead><tbody>
+          <div #productTable class="table-wrap"><table><thead><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Visibilidade</th><th>Ações</th></tr></thead><tbody>
             @for (product of paginatedProducts(); track product.id; let index = $index) { <tr [class.category-start]="index > 0 && product.categoryId !== paginatedProducts()[index - 1].categoryId"><td><div class="product-cell"><img [src]="product.image" [alt]="''" loading="lazy"><strong>{{ product.name }}</strong></div></td><td>{{ categoryName(product.categoryId) }}</td><td>{{ product.price | currency:'BRL' }}</td><td><span class="state" [class.is-muted]="!product.published || !product.available">{{ product.published ? (product.available ? 'Publicado' : 'Indisponível') : 'Rascunho' }}</span></td><td><div class="row-actions"><button type="button" class="icon-button" [attr.aria-label]="'Editar ' + product.name" (click)="editProduct(product)"><span class="material-symbols-outlined">edit</span></button><button type="button" class="icon-button danger" [attr.aria-label]="'Excluir ' + product.name" (click)="deleteProduct(product)"><span class="material-symbols-outlined">delete</span></button></div></td></tr> }
           </tbody></table></div>
           @if (productPageCount() > 1) { <nav class="pagination" aria-label="Paginação de produtos"><button type="button" class="icon-button" [disabled]="productPage() === 1" aria-label="Página anterior" (click)="changeProductPage(-1)"><span class="material-symbols-outlined">chevron_left</span></button><span>Página {{ productPage() }} de {{ productPageCount() }}</span><button type="button" class="icon-button" [disabled]="productPage() === productPageCount()" aria-label="Próxima página" (click)="changeProductPage(1)"><span class="material-symbols-outlined">chevron_right</span></button></nav> }
@@ -65,7 +66,7 @@ const emptyCategory = (): CategoryDraft => ({ name: '', hasSizes: false });
         }
         @if (loading()) { <p class="loading" role="status"><span class="material-symbols-outlined" aria-hidden="true">progress_activity</span>Carregando categorias...</p> }
         @else if (!categories().length) { <div class="empty-state"><span class="material-symbols-outlined" aria-hidden="true">category</span><div class="empty-copy"><h3>Nenhuma categoria cadastrada</h3><p>Crie categorias para organizar o cardápio público.</p></div></div> }
-        @else { <div class="category-list">@for (category of paginatedCategories(); track category.id) { <article><span class="material-symbols-outlined" aria-hidden="true">{{ category.hasSizes ? 'straighten' : 'bakery_dining' }}</span><div><strong>{{ category.name }}</strong><small>{{ category.hasSizes ? 'Permite tamanhos diferentes' : 'Tamanho único' }}</small></div><button type="button" class="icon-button" [attr.aria-label]="'Editar categoria ' + category.name" (click)="editCategory(category)"><span class="material-symbols-outlined">edit</span></button><button type="button" class="icon-button danger" [attr.aria-label]="'Excluir categoria ' + category.name" (click)="deleteCategory(category)"><span class="material-symbols-outlined">delete</span></button></article> }</div> }
+        @else { <div #categoryTable class="category-list">@for (category of paginatedCategories(); track category.id) { <article><span class="material-symbols-outlined" aria-hidden="true">{{ category.hasSizes ? 'straighten' : 'bakery_dining' }}</span><div><strong>{{ category.name }}</strong><small>{{ category.hasSizes ? 'Permite tamanhos diferentes' : 'Tamanho único' }}</small></div><button type="button" class="icon-button" [attr.aria-label]="'Editar categoria ' + category.name" (click)="editCategory(category)"><span class="material-symbols-outlined">edit</span></button><button type="button" class="icon-button danger" [attr.aria-label]="'Excluir categoria ' + category.name" (click)="deleteCategory(category)"><span class="material-symbols-outlined">delete</span></button></article> }</div> }
         @if (categoryPageCount() > 1) { <nav class="pagination" aria-label="Paginação de categorias"><button type="button" class="icon-button" [disabled]="categoryPage() === 1" aria-label="Página anterior" (click)="changeCategoryPage(-1)"><span class="material-symbols-outlined">chevron_left</span></button><span>Página {{ categoryPage() }} de {{ categoryPageCount() }}</span><button type="button" class="icon-button" [disabled]="categoryPage() === categoryPageCount()" aria-label="Próxima página" (click)="changeCategoryPage(1)"><span class="material-symbols-outlined">chevron_right</span></button></nav> }
       }
       @if (!unavailable() && categories().length) {
@@ -107,6 +108,7 @@ const emptyCategory = (): CategoryDraft => ({ name: '', hasSizes: false });
     input:not([type=checkbox]), textarea, select { width: 100%; min-width: 0; min-height: 42px; padding: 9px 11px; border: 1px solid #ded6cb; border-radius: 2px; background: var(--paper); color: var(--ink); font: 400 .9rem var(--sans); }
     input[type=checkbox] { width: 20px; height: 20px; flex: 0 0 auto; accent-color: var(--cocoa); cursor: pointer; }
     textarea { resize: vertical; }
+    .image-field small { color: var(--muted); font-size: .75rem; font-weight: 400; }
     input:focus, textarea:focus, select:focus { outline: 2px solid var(--honey); outline-offset: 1px; }
     .span-two { grid-column: span 2; }
     .size-fields { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 0; padding: 14px; border: 1px solid var(--line); }
@@ -119,9 +121,9 @@ const emptyCategory = (): CategoryDraft => ({ name: '', hasSizes: false });
     .toggles { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
     .toggles label { display: inline-flex; align-items: center; gap: 7px; color: var(--cocoa); font-size: .85rem; }
     .form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 20px; }
-    .table-wrap { overflow-x: auto; border: 1px solid var(--line); background: #fff; }
+    .table-wrap { overflow-x: auto; border: 1px solid #c9a878; background: #fff; box-shadow: 0 12px 30px #39281912; }
     table { width: 100%; border-collapse: collapse; text-align: left; }
-    th, td { padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: .84rem; white-space: nowrap; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid #d8c4a8; font-size: .84rem; white-space: nowrap; }
     th { background: #f4f0e9; color: var(--cocoa); font-size: .75rem; }
     tbody tr:last-child td { border-bottom: 0; }
     tbody tr.category-start td { border-top: 3px solid #eee8df; }
@@ -200,6 +202,8 @@ export class AdminComponent {
   private noticeTimeout?: ReturnType<typeof setTimeout>;
   @ViewChild('productEditor') private productEditor?: ElementRef<HTMLFormElement>;
   @ViewChild('categoryEditor') private categoryEditor?: ElementRef<HTMLFormElement>;
+  @ViewChild('productTable') private productTable?: ElementRef<HTMLDivElement>;
+  @ViewChild('categoryTable') private categoryTable?: ElementRef<HTMLDivElement>;
   protected readonly section = signal<'products' | 'categories'>('products');
   protected readonly products = signal<AdminProduct[]>([]);
   protected readonly categories = signal<AdminCategory[]>([]);
@@ -247,6 +251,7 @@ export class AdminComponent {
   protected readonly productId = signal<number | undefined>(undefined);
   protected readonly categoryId = signal<number | undefined>(undefined);
   protected draft = emptyProduct();
+  protected selectedImage?: File;
   protected categoryDraft = emptyCategory();
   protected basePriceInput = '';
   protected sizePriceInputs: Partial<Record<ProductSize, string>> = {};
@@ -279,9 +284,10 @@ export class AdminComponent {
     });
   }
 
-  protected newProduct(): void { this.draft = { ...emptyProduct(), categoryId: this.categories()[0]?.id ?? 0 }; this.basePriceInput = ''; this.sizePriceInputs = {}; this.selectedSizes.set(new Set()); this.productId.set(undefined); this.editingProduct.set(true); this.clearNotices(); }
+  protected newProduct(): void { this.draft = { ...emptyProduct(), categoryId: this.categories()[0]?.id ?? 0 }; this.selectedImage = undefined; this.basePriceInput = ''; this.sizePriceInputs = {}; this.selectedSizes.set(new Set()); this.productId.set(undefined); this.editingProduct.set(true); this.clearNotices(); }
   protected editProduct(product: AdminProduct): void {
     this.draft = { ...product, sizePrices: { ...product.sizePrices } };
+    this.selectedImage = undefined;
     this.basePriceInput = this.formatBasePrice(product.price);
     const selectedSizes = this.sizeOptions.filter((size) => typeof product.sizePrices?.[size.key] === 'number');
     this.selectedSizes.set(new Set(selectedSizes.map((size) => size.key)));
@@ -295,6 +301,24 @@ export class AdminComponent {
   }
   protected categoryAllowsSizes(): boolean { return this.categories().find((category) => category.id === Number(this.draft.categoryId))?.hasSizes ?? false; }
   protected isSizeSelected(size: ProductSize): boolean { return this.selectedSizes().has(size); }
+
+  protected selectImage(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const image = input.files?.[0];
+    if (!image) return;
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(image.type)) {
+      input.value = '';
+      this.showNoticeError('Selecione uma imagem JPG, PNG, WebP ou AVIF.');
+      return;
+    }
+    if (image.size > 5 * 1024 * 1024) {
+      input.value = '';
+      this.showNoticeError('A imagem deve ter no máximo 5 MB.');
+      return;
+    }
+    this.selectedImage = image;
+    this.clearNotices();
+  }
 
   protected toggleSize(size: ProductSize, selected: boolean): void {
     const selectedSizes = new Set(this.selectedSizes());
@@ -347,6 +371,10 @@ export class AdminComponent {
       this.showNoticeError(`Revise os campos do produto: ${invalidFields || 'há campos inválidos'}.`);
       return;
     }
+    if (!this.draft.image && !this.selectedImage) {
+      this.showNoticeError('Selecione uma imagem para o produto.');
+      return;
+    }
     this.saving.set(true); this.clearNotices();
     const sizePrices = this.categoryAllowsSizes()
       ? Object.fromEntries(Object.entries(this.draft.sizePrices ?? {}).filter(([, price]) => price !== null && price !== undefined && Number.isFinite(Number(price))).map(([size, price]) => [size, Number(price)]))
@@ -358,7 +386,10 @@ export class AdminComponent {
       displayOrder: Number(this.draft.displayOrder) || 0,
       sizePrices
     } as ProductDraft;
-    this.admin.saveProduct(payload as AdminProduct, this.productId()).subscribe({
+    const save$ = this.selectedImage
+      ? this.admin.uploadImage(this.selectedImage).pipe(switchMap(({ url }) => this.admin.saveProduct({ ...payload, image: url } as AdminProduct, this.productId())))
+      : this.admin.saveProduct(payload as AdminProduct, this.productId());
+    save$.subscribe({
       next: () => { this.showNotice('Produto salvo.'); this.saving.set(false); this.cancelProduct(); this.refresh(); },
       error: (error) => { this.showError(error); this.saving.set(false); }
     });
@@ -398,10 +429,12 @@ export class AdminComponent {
 
   protected changeProductPage(direction: -1 | 1): void {
     this.productPage.update((page) => Math.max(1, Math.min(this.productPageCount(), page + direction)));
+    this.scrollToPageStart(this.productTable);
   }
 
   protected changeCategoryPage(direction: -1 | 1): void {
     this.categoryPage.update((page) => Math.max(1, Math.min(this.categoryPageCount(), page + direction)));
+    this.scrollToPageStart(this.categoryTable);
   }
 
   protected dropCategory(event: CdkDragDrop<AdminCategory[]>): void {
@@ -442,6 +475,10 @@ export class AdminComponent {
       const editor = this.productEditor?.nativeElement ?? this.categoryEditor?.nativeElement;
       editor?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, { injector: this.injector });
+  }
+
+  private scrollToPageStart(target?: ElementRef<HTMLElement>): void {
+    afterNextRender(() => target?.nativeElement.scrollIntoView({ behavior: 'auto', block: 'start' }), { injector: this.injector });
   }
 
   private showError(error: HttpErrorResponse): void {

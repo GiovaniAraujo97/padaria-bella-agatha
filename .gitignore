@@ -14,6 +14,7 @@ yarn-error.log
 !.env.example
 /.catalog-dev.json
 /.catalog-dev.json.tmp
+/uploads/
 
 # IDEs and editors
 .idea/

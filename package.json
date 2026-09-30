@@ -3,12 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "node --env-file=.env ./node_modules/@angular/cli/bin/ng.js serve",
+    "start": "node ./node_modules/@angular/cli/bin/ng.js serve",
     "build": "ng build",
-    "db:migrate": "node --env-file=.env scripts/migrate.mjs",
-    "admin:bootstrap": "node scripts/create-temporary-admin.mjs",
-    "admin:password": "node scripts/hash-admin-password.mjs --update-env",
-    "serve:production": "node --env-file=.env dist/padaria-bella-agatha/server/server.mjs",
+    "serve:production": "node dist/padaria-bella-agatha/server/server.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:padaria-bella-agatha": "node dist/padaria-bella-agatha/server/server.mjs"
@@ -26,8 +23,8 @@
     "@angular/platform-server": "^22.1.0",
     "@angular/router": "^22.1.0",
     "@angular/ssr": "^22.1.4",
+    "@supabase/supabase-js": "^2.117.2",
     "express": "^5.1.0",
-    "pg": "^8.23.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -37,7 +34,6 @@
     "@angular/compiler-cli": "^22.1.0",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
-    "@types/pg": "^8.23.1",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",

@@ -4,21 +4,26 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 # Padaria Bella Agatha
 
-Aplicação Angular com vitrine pública e painel administrativo para o catálogo da padaria. A API é servida pelo Express SSR e usa PostgreSQL; imagens são armazenadas como URLs, pois o projeto não possuía serviço de upload.
+Aplicação Angular com vitrine pública e painel administrativo para o catálogo da padaria. O cliente usa o Supabase Auth, PostgreSQL e Storage diretamente, com RLS protegendo o acesso administrativo.
 
 ## Requisitos
 
-- Node.js suportado pelo Angular CLI 22 e com suporte a `--env-file`.
-- PostgreSQL 13 ou superior, acessível pelo servidor da aplicação.
+- Node.js suportado pelo Angular CLI 22.
+- Projeto Supabase com PostgreSQL e Auth habilitados.
 
 ## Configuração local
 
-1. Execute `npm run admin:bootstrap` para criar `.env` com um administrador temporário. O comando exibe o e-mail e a senha uma única vez; guarde a senha. O arquivo contém somente o hash e o segredo de sessão.
-2. Configure `DATABASE_URL` em `.env` com a URL privada do PostgreSQL quando o banco estiver disponível.
-3. Aplique o schema e os dados demonstrativos com `npm run db:migrate`.
-4. Compile e execute o servidor que hospeda a API e o SSR:
+1. No SQL Editor do Supabase, execute as migrations `001_catalog.sql`, `002_category_sizes.sql`, `003_admin_users.sql` e `004_supabase_auth_policies.sql`, nesta ordem.
+2. Em Authentication > Users, crie manualmente o usuário administrador e confirme o e-mail.
+3. No SQL Editor, autorize o UUID criado:
 
-Para trocar a senha depois, execute `npm run admin:password`, informe a nova senha no prompt oculto e reinicie o servidor.
+```sql
+INSERT INTO public.admin_users (user_id, email)
+SELECT id, email FROM auth.users WHERE email = 'seu-email@exemplo.com'
+ON CONFLICT (user_id) DO UPDATE SET email = EXCLUDED.email, is_active = TRUE;
+```
+
+4. Compile e execute:
 
 ```powershell
 npm install
@@ -26,9 +31,7 @@ npm run build
 npm run serve:production
 ```
 
-Abra `http://localhost:4000/`. O painel fica em `/admin/login`. O comando `npm start` continua disponível para desenvolvimento Angular; a API persistente exige que o servidor Express seja executado com as variáveis de ambiente configuradas.
-
-Não versione o arquivo `.env`. Em produção, use HTTPS e defina `NODE_ENV=production` para ativar o atributo `Secure` do cookie. O segredo PostgreSQL deve existir apenas no servidor e ter permissões restritas; use uma URL com SSL conforme as exigências do provedor.
+Abra `http://localhost:4000/`. O painel fica em `/admin/login`. Para desenvolvimento, execute `npm start` e abra `http://localhost:4200/`.
 
 Inclua o hostname público da implantação em `security.allowedHosts` no `angular.json`; `localhost` já está permitido para desenvolvimento. A lista continua restrita para proteger o SSR contra cabeçalhos `Host` arbitrários.
 
@@ -36,18 +39,18 @@ Inclua o hostname público da implantação em `security.allowedHosts` no `angul
 
 A migration `database/migrations/001_catalog.sql` cria `categories`, `products` e `product_sizes`, com chaves estrangeiras, restrições, índices, datas e políticas RLS. Categorias não podem ser apagadas enquanto houver produtos associados; tamanhos são apagados junto com o produto. Visitantes consultam apenas categorias visíveis e produtos publicados. A disponibilidade é separada da publicação para sinalizar itens temporariamente indisponíveis.
 
-A migration `database/migrations/002_category_sizes.sql` adiciona a opção `has_sizes` às categorias e marca Bolos e Tortas como categorias com tamanhos diferentes. No painel, uma categoria contém somente nome e a opção de permitir tamanhos; slug, ícone e ordem são definidos automaticamente.
+A migration `database/migrations/002_category_sizes.sql` adiciona a opção `has_sizes` às categorias. No painel, uma categoria contém somente nome e a opção de permitir tamanhos; slug, ícone e ordem são definidos automaticamente.
 
-A migration inicial inclui, sem substituir registros existentes, as categorias e os oito produtos que já estavam no mock da vitrine. Eles são conteúdo demonstrativo e devem ser revisados antes de publicação comercial. O bootstrap cria um único administrador temporário em `.env`; a senha usa scrypt e a sessão é assinada em cookie HttpOnly/SameSite. A autenticação funciona sem PostgreSQL, mas o CRUD exige `DATABASE_URL` e a migration aplicada. Quando as contas forem movidas para o banco, remova a credencial temporária e migre a autorização para usuários cadastrados; não existe cadastro público de administradores.
+A migration `database/migrations/003_admin_users.sql` cria a autorização dos administradores ligada ao UUID de `auth.users`. A migration `004_supabase_auth_policies.sql` aplica RLS ao catálogo e cria o bucket `product-images`, permitindo escrita somente a administradores ativos. A URL pública e a chave publishable ficam em `src/app/core/config/supabase.config.ts`; a chave `service_role` não é usada no frontend.
 
 ## Uso do painel
 
 - `/admin/login`: autenticação do administrador configurado no servidor.
-- Produtos: cadastro, edição, exclusão com confirmação, categoria, preço base, tamanhos, imagem por URL, ordenação, destaque, publicação e disponibilidade.
+- Produtos: cadastro, edição, exclusão com confirmação, categoria, preço base, tamanhos, upload de imagem, ordenação, destaque, publicação e disponibilidade.
 - Categorias: cadastro e edição de nome e permissão para tamanhos diferentes; metadados técnicos são automáticos e a exclusão respeita produtos associados.
 - `/produtos`: busca por nome/descrição e filtros por categoria. Produtos publicados mas indisponíveis continuam visíveis e não podem ser adicionados ao carrinho.
 
-Para usar imagens, informe uma URL HTTPS pública ou um caminho servido pela própria aplicação. Não há armazenamento/upload de arquivos configurado.
+Os uploads aceitam JPG, PNG, WebP e AVIF até 5 MB e são armazenados no bucket público `product-images` do Supabase Storage.
 
 ## Verificações
 

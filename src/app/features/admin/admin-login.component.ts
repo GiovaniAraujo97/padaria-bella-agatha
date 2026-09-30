@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -19,9 +18,14 @@ import { AdminService } from '../../core/services/admin.service';
           <label for="admin-email">E-mail</label>
           <input id="admin-email" name="email" type="email" autocomplete="username" [(ngModel)]="email" required email>
           <label for="admin-password">Senha</label>
-          <input id="admin-password" name="password" type="password" autocomplete="current-password" [(ngModel)]="password" required>
+          <div class="password-field">
+            <input id="admin-password" name="password" [type]="showPassword() ? 'text' : 'password'" autocomplete="current-password" [(ngModel)]="password" required>
+            <button class="password-toggle" type="button" [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'" [attr.aria-pressed]="showPassword()" (click)="showPassword.set(!showPassword())">
+              <span class="material-symbols-outlined" aria-hidden="true">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
           @if (error()) { <p class="form-error" role="alert">{{ error() }}</p> }
-          <button class="button" type="submit" [disabled]="form.invalid || loading()">
+          <button class="button submit-button" type="submit" [disabled]="form.invalid || loading()">
             {{ loading() ? 'Verificando...' : 'Entrar' }}
           </button>
         </form>
@@ -37,11 +41,17 @@ import { AdminService } from '../../core/services/admin.service';
     .login-panel > p { margin: 0 0 28px; color: var(--muted); }
     form { display: grid; gap: 9px; }
     label { margin-top: 9px; color: var(--cocoa); font-size: .85rem; font-weight: 700; }
+    .password-field { position: relative; }
     input { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: inherit; }
+    .password-field input { padding-right: 48px; }
     input:focus { outline: 2px solid var(--honey); outline-offset: 1px; }
+    .password-toggle { position: absolute; top: 50%; right: 4px; display: grid; width: 38px; height: 38px; margin: 0; padding: 0; place-items: center; transform: translateY(-50%); border: 0; background: transparent; color: var(--muted); }
+    .password-toggle:hover { color: var(--cocoa); }
+    .password-toggle:focus-visible { outline: 2px solid var(--honey); outline-offset: -2px; }
+    .password-toggle .material-symbols-outlined { font-size: 20px; }
     .form-error { margin: 5px 0; color: #a43f32; font-size: .85rem; }
-    button { width: 100%; margin-top: 14px; }
-    button:disabled { opacity: .6; cursor: wait; }
+    .submit-button { width: 100%; margin-top: 14px; }
+    .submit-button:disabled { opacity: .6; cursor: wait; }
     @media (max-width: 500px) { .login-panel { padding: 28px 22px; } h1 { font-size: 1.65rem; overflow-wrap: anywhere; } }
   `]
 })
@@ -51,6 +61,7 @@ export class AdminLoginComponent {
   private readonly route = inject(ActivatedRoute);
   protected email = '';
   protected password = '';
+  protected readonly showPassword = signal(false);
   protected readonly loading = signal(false);
   protected readonly error = signal('');
 
@@ -63,8 +74,8 @@ export class AdminLoginComponent {
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
         void this.router.navigateByUrl(returnUrl?.startsWith('/admin') ? returnUrl : '/admin');
       },
-      error: (response: HttpErrorResponse) => {
-        this.error.set(response.error?.error ?? 'Não foi possível acessar agora. Tente novamente.');
+      error: (response: { message?: string }) => {
+        this.error.set(response.message ?? 'Não foi possível acessar agora. Tente novamente.');
         this.loading.set(false);
       }
     });
