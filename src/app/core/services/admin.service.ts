@@ -1,6 +1,6 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, from, map, Observable, of, switchMap, throwError } from 'rxjs';
 import { Category } from '../interfaces/category.interface';
 import { Product, ProductSize } from '../interfaces/product.interface';
 import { supabase } from '../config/supabase.config';
@@ -22,6 +22,14 @@ export interface AdminCategory extends Category {
 
 export type CategoryInput = Pick<AdminCategory, 'name' | 'hasSizes'>;
 
+export interface AuthenticatedAdminSession {
+  auth_user_id: string;
+  nome: string;
+  email: string;
+  empresa_id: number;
+  role: 'admin';
+}
+
 type DatabaseProduct = {
   id: number;
   name: string;
@@ -39,24 +47,34 @@ type DatabaseProduct = {
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
-  login(email: string, password: string): Observable<{ email: string }> {
+  private readonly activeSession = signal<AuthenticatedAdminSession | null>(null);
+
+  login(email: string, password: string): Observable<AuthenticatedAdminSession> {
     return from(supabase.auth.signInWithPassword({ email, password })).pipe(
       map(({ data, error }) => {
         if (error || !data.user?.email) throw error ?? new Error('E-mail ou senha inválidos.');
-        return { email: data.user.email };
+        return data.user.id;
       }),
-      switchMap((session) => this.session().pipe(map(() => session)))
+      switchMap(() => this.session())
     );
   }
 
-  session(): Observable<{ email: string }> {
+  session(): Observable<AuthenticatedAdminSession> {
     return from(supabase.auth.getUser()).pipe(
       switchMap(({ data, error }) => {
         if (error || !data.user?.email) throw error ?? new Error('Sessão não encontrada.');
-        return from(supabase.from('admin_users').select('user_id').eq('user_id', data.user.id).eq('is_active', true).maybeSingle()).pipe(
-          map(({ data: admin, error: adminError }) => {
-            if (adminError || !admin) throw adminError ?? new Error('Usuário sem permissão administrativa.');
-            return { email: data.user!.email! };
+        return from(supabase.from('usuarios').select('auth_user_id,nome,email,empresa_id,role').eq('auth_user_id', data.user.id).eq('role', 'admin').maybeSingle()).pipe(
+          map(({ data: profile, error: profileError }) => {
+            if (profileError || !profile) throw profileError ?? new Error('Usuário sem permissão administrativa.');
+            const session: AuthenticatedAdminSession = {
+              auth_user_id: profile.auth_user_id,
+              nome: profile.nome,
+              email: profile.email,
+              empresa_id: profile.empresa_id,
+              role: profile.role
+            };
+            this.activeSession.set(session);
+            return session;
           })
         );
       })
@@ -64,7 +82,10 @@ export class AdminService {
   }
 
   logout(): Observable<void> {
-    return from(supabase.auth.signOut()).pipe(map(({ error }) => { if (error) throw error; }));
+    return from(supabase.auth.signOut()).pipe(map(({ error }) => {
+      if (error) throw error;
+      this.activeSession.set(null);
+    }));
   }
 
   categories(): Observable<AdminCategory[]> {
@@ -139,7 +160,9 @@ export class AdminService {
   }
 
   uploadImage(image: File): Observable<{ url: string }> {
-    const path = `${crypto.randomUUID()}-${image.name.replace(/[^a-zA-Z0-9._-]/g, '-')}`;
+    const empresaId = this.activeSession()?.empresa_id;
+    if (!empresaId) return throwError(() => new Error('Empresa do administrador não identificada. Entre novamente.'));
+    const path = `${empresaId}/${crypto.randomUUID()}-${image.name.replace(/[^a-zA-Z0-9._-]/g, '-')}`;
     return from(supabase.storage.from('product-images').upload(path, image, { contentType: image.type, upsert: false })).pipe(
       map(({ error }) => {
         if (error) throw error;
@@ -168,6 +191,7 @@ export class AdminService {
   private slugify(value: string): string {
     return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'categoria';
   }
+
 }
 
 export const adminGuard: CanActivateFn = (_route, state) => {

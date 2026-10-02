@@ -13,14 +13,21 @@ Aplicação Angular com vitrine pública e painel administrativo para o catálog
 
 ## Configuração local
 
-1. No SQL Editor do Supabase, execute as migrations `001_catalog.sql`, `002_category_sizes.sql`, `003_admin_users.sql` e `004_supabase_auth_policies.sql`, nesta ordem.
+1. No projeto Supabase existente `catalogos-clientes`, após a migration 006 execute `007_tenant_isolation.sql` e depois `008_remove_duplicate_catalog_tables.sql`.
 2. Em Authentication > Users, crie manualmente o usuário administrador e confirme o e-mail.
-3. No SQL Editor, autorize o UUID criado:
+3. Para um novo tenant, crie a empresa e associe o usuário Auth pelo `auth_user_id` usando o SQL Editor:
 
 ```sql
-INSERT INTO public.admin_users (user_id, email)
-SELECT id, email FROM auth.users WHERE email = 'seu-email@exemplo.com'
-ON CONFLICT (user_id) DO UPDATE SET email = EXCLUDED.email, is_active = TRUE;
+WITH empresa AS (
+  INSERT INTO public.empresas (nome, slug)
+  VALUES ('Minha Empresa', 'minha-empresa')
+  RETURNING id
+)
+INSERT INTO public.usuarios (auth_user_id, empresa_id, nome, email, role)
+SELECT auth_user.id, empresa.id, 'Nome do Administrador', auth_user.email, 'admin'
+FROM auth.users AS auth_user
+CROSS JOIN empresa
+WHERE auth_user.email = 'admin@minhaempresa.com';
 ```
 
 4. Compile e execute:
@@ -41,7 +48,11 @@ A migration `database/migrations/001_catalog.sql` cria `categories`, `products` 
 
 A migration `database/migrations/002_category_sizes.sql` adiciona a opção `has_sizes` às categorias. No painel, uma categoria contém somente nome e a opção de permitir tamanhos; slug, ícone e ordem são definidos automaticamente.
 
-A migration `database/migrations/003_admin_users.sql` cria a autorização dos administradores ligada ao UUID de `auth.users`. A migration `004_supabase_auth_policies.sql` aplica RLS ao catálogo e cria o bucket `product-images`, permitindo escrita somente a administradores ativos. A URL pública e a chave publishable ficam em `src/app/core/config/supabase.config.ts`; a chave `service_role` não é usada no frontend.
+A migration `database/migrations/003_admin_users.sql` cria a autorização legada ligada ao UUID de `auth.users`. A migration `004_supabase_auth_policies.sql` aplica RLS ao catálogo e cria o bucket `product-images`. A migration `006_usuarios_auth_permissions.sql` concede leitura do perfil autenticado. A migration `007_tenant_isolation.sql` cria tabelas de catálogo ausentes, associa categorias e produtos à empresa, limpa registros órfãos e instala RLS compatível com `usuarios.auth_user_id`. A migration `008_remove_duplicate_catalog_tables.sql` remove as tabelas vazias legadas `productos` e `categorias`; ela usa `RESTRICT`, sem apagar dependências em cascata. A URL pública e a chave publishable ficam em `src/app/core/config/supabase.config.ts`; a chave `service_role` não é usada no frontend.
+
+Para cadastrar novos tenants, o registro da empresa e seus usuários deve ser feito por um operador confiável no SQL Editor ou por um processo server-side com credenciais administrativas. Não exponha a chave `service_role` no navegador.
+
+O RLS restringe administradores à própria empresa. Como o frontend permanece no fluxo legado, o catálogo anônimo continua publicado apenas para a Bella Agatha; expor o catálogo de outros tenants por slug/domínio exige uma etapa posterior de roteamento público.
 
 ## Uso do painel
 
