@@ -479,6 +479,10 @@ BEGIN
   END LOOP;
 END $$;
 
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('product-images', 'product-images', TRUE)
+ON CONFLICT (id) DO UPDATE SET public = EXCLUDED.public;
+
 CREATE POLICY product_images_public_read ON storage.objects FOR SELECT TO anon, authenticated
   USING (bucket_id = 'product-images');
 CREATE POLICY product_images_tenant_insert ON storage.objects FOR INSERT TO authenticated
@@ -500,3 +504,37 @@ CREATE POLICY product_images_tenant_delete ON storage.objects FOR DELETE TO auth
     bucket_id = 'product-images'
     AND (storage.foldername(name))[1] = public.current_empresa_id()::TEXT
   );
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_publication_tables
+      WHERE pubname = 'supabase_realtime'
+        AND schemaname = 'public'
+        AND tablename = 'categories'
+    ) THEN
+      ALTER PUBLICATION supabase_realtime ADD TABLE public.categories;
+    END IF;
+
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_publication_tables
+      WHERE pubname = 'supabase_realtime'
+        AND schemaname = 'public'
+        AND tablename = 'products'
+    ) THEN
+      ALTER PUBLICATION supabase_realtime ADD TABLE public.products;
+    END IF;
+
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_publication_tables
+      WHERE pubname = 'supabase_realtime'
+        AND schemaname = 'public'
+        AND tablename = 'product_sizes'
+    ) THEN
+      ALTER PUBLICATION supabase_realtime ADD TABLE public.product_sizes;
+    END IF;
+  END IF;
+END $$;

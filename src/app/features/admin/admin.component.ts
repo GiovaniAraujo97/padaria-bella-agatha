@@ -482,9 +482,27 @@ export class AdminComponent {
     afterNextRender(() => target?.nativeElement.scrollIntoView({ behavior: 'auto', block: 'start' }), { injector: this.injector });
   }
 
-  private showError(error: HttpErrorResponse): void {
-    if (error.status === 0 || error.status === 503) this.unavailable.set(true);
-    this.showNoticeError(error.error?.error ?? 'Não foi possível concluir a operação.');
+  private showError(error: unknown): void {
+    if (error instanceof HttpErrorResponse && (error.status === 0 || error.status === 503)) {
+      this.unavailable.set(true);
+    }
+
+    const response = error && typeof error === 'object'
+      ? error as { message?: unknown; details?: unknown; hint?: unknown; code?: unknown; error?: unknown }
+      : {};
+    const nestedError = response.error && typeof response.error === 'object'
+      ? response.error as { message?: unknown; error?: unknown }
+      : {};
+    const message = [
+      typeof nestedError.message === 'string' ? nestedError.message : undefined,
+      typeof nestedError.error === 'string' ? nestedError.error : undefined,
+      typeof response.message === 'string' ? response.message : undefined,
+      typeof response.details === 'string' ? response.details : undefined,
+      typeof response.hint === 'string' ? response.hint : undefined,
+      typeof response.code === 'string' ? `Código: ${response.code}` : undefined
+    ].filter(Boolean).join(' · ');
+
+    this.showNoticeError(message || 'Não foi possível concluir a operação.');
   }
   private showNotice(message: string): void {
     this.clearNoticeTimer();
